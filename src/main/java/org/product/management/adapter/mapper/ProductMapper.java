@@ -9,5 +9,6 @@ import org.product.management.domain.entity.Product;
 public interface ProductMapper {
     ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
     Product convertToProductEntity(ProductRequestResponseDto dto);
+
     ProductRequestResponseDto convertToProductRequestResponseDTO(Product entity);
 }

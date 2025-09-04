@@ -1,76 +1,76 @@
 package org.product.management.application.service;
 
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.jboss.logging.Logger;
+import org.product.management.adapter.in.rest.dto.AvailabilityResponse;
 import org.product.management.adapter.in.rest.dto.ProductRequestResponseDto;
 import org.product.management.adapter.mapper.ProductMapper;
 import org.product.management.domain.entity.Product;
-import org.product.management.domain.repository.ProductRepository;
+import org.product.management.domain.repository.ProductDetailsRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class ProductService {
-
+    private static final Logger log = Logger.getLogger(ProductService.class);
     @Inject
-    ProductRepository productRepository;
-@Transactional
-    public ProductRequestResponseDto saveProduct(ProductRequestResponseDto entityDTO) {
-        Product entity = null;
-        try {
-            // Mapping the DTO class to Entity class
-            entity = ProductMapper.INSTANCE.convertToProductEntity(entityDTO);
-            // Product Details are saved in DB
-            productRepository.save(entity);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-        return ProductMapper.INSTANCE.convertToProductRequestResponseDTO(entity);
+    ProductDetailsRepository productRepository;
+
+    @Transactional
+    public Uni<Product> saveProduct(ProductRequestResponseDto entityDTO) {
+
+        // Mapping the DTO class to Entity class
+        Product entity = ProductMapper.INSTANCE.convertToProductEntity(entityDTO);
+        // Product Details are saved in DB and returned
+        return productRepository.persist(entity)
+                // return entity after persisting
+                .replaceWith(entity)
+                .onFailure().invoke(e -> log.error("Failed to save product", e));
+
     }
 
-    public List<Product> getAllProduct(){
+    public Uni<List<Product>> getAllProduct() {
         // Get Details of All Product
-        List<Product> allProducts = productRepository.findAll();
-        return allProducts;
+        return productRepository.findAllProducts();
     }
 
-    public Optional<Product> getProductDetailsById(int id){
+    public Uni<Product> getProductDetailsById(int id) {
         // Get Product Details by ID
-        Optional<Product> productDetail = productRepository.findById(id);
-        return productDetail;
+        return productRepository.findProductById(id);
     }
 
-    public Optional<Product> updateProductDetails(int id, ProductRequestResponseDto dto){
+    @Transactional
+    public Uni<Product> updateProductDetails(int id, ProductRequestResponseDto dto) {
         // Get Existing Product Details
-        Optional<Product> product = productRepository.findById(id);
-        if(product.isPresent()){
-            product.get().setName(dto.getName());
-            product.get().setQuantity(dto.getQuantity());
-            product.get().setPrice(dto.getPrice());
-            product.get().setDescription(dto.getDescription());
-            product.get().setUpdatedOn(LocalDateTime.now());
-            // saving the updated Details
-            productRepository.save(product.get());
-        }
-        return product;
+        Uni<Product> entity = productRepository.findProductById(id);
+        return entity.onItem().ifNotNull().transform(product -> {
+                product.setName(dto.getName());
+                product.setQuantity(dto.getQuantity());
+                product.setPrice(dto.getPrice());
+                product.setDescription(dto.getDescription());
+                product.setUpdatedOn(LocalDateTime.now());
+                return product;
+            });
     }
 
-    public void deleteProductDetails(int id){
+    public Uni<Boolean> deleteProductDetails(int id) {
         // Delete the all Details of the Product
-        Optional<Product> product = productRepository.findById(id);
-        if (product.isPresent()){
-            productRepository.delete(product.get());
-        }
+        return productRepository.deleteById((Long.parseLong(String.valueOf(id))));
     }
 
-    public Optional<Product> getProductById(int id){
-        return productRepository.findById(id);
+    public Uni<AvailabilityResponse> getCheckProductQuantity(int id, int count) {
+        Uni<Integer> quantity = productRepository.getProductQuantityById(id);
+        return quantity.onItem().ifNotNull().transform(productQuantity -> {
+            boolean available = productQuantity >= count;
+            return new AvailabilityResponse(id, count, available);
+        });
     }
 
-    public List<Product> getProductSortedByPrice(){
-        return productRepository.findAllByOrderByPriceAsc();
+    public Uni<List<Product>> getProductSortedByPrice() {
+        return productRepository.findAllProductByPriceAsc();
     }
 }
