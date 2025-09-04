@@ -1,5 +1,6 @@
 package org.product.management.application.service;
 
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,12 +16,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
+@WithTransaction
 public class ProductService {
     private static final Logger log = Logger.getLogger(ProductService.class);
     @Inject
     ProductDetailsRepository productRepository;
 
-    @Transactional
     public Uni<Product> saveProduct(ProductRequestResponseDto entityDTO) {
 
         // Mapping the DTO class to Entity class
@@ -43,7 +44,7 @@ public class ProductService {
         return productRepository.findProductById(id);
     }
 
-    @Transactional
+    @WithTransaction
     public Uni<Product> updateProductDetails(int id, ProductRequestResponseDto dto) {
         // Get Existing Product Details
         Uni<Product> entity = productRepository.findProductById(id);
