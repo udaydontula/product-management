@@ -64,7 +64,7 @@ mvn test
 | HTTP Method | Path | Description | Request Body | Response |
 |-------------|------|-------------|--------------|----------|
 | POST | /product/saveProduct | Create a new product | `ProductRequestResponseDto` JSON | 201 Created + Product JSON |
-| GET | /product/allProducts | Get all products | None | 200 OK + List of Products / 404 if empty |
+| GET | /product/allProducts | Get all products | None | 200 OK + List of Products / 200 OK + empty List |
 | GET | /product/getDetails/{id} | Get product by ID | None | 200 OK + Product / 404 Not Found |
 | PUT | /product/update/{id} | Update product by ID | `ProductRequestResponseDto` JSON | 200 OK + Updated Product / 404 Not Found |
 | DELETE | /product/delete/{id} | Delete product by ID | None | 204 No Content |
