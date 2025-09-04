@@ -1,15 +1,17 @@
 # Product Management
 
 ## Description
-This is a Quarkus-based REST API for managing products.  
-It provides endpoints to create, read, update, delete, check stock availability, and retrieve products sorted by price.
+This is a **Quarkus Reactive REST API** for managing products.  
+It provides **non-blocking, reactive endpoints** to create, read, update, delete, check stock availability, and retrieve products sorted by price.  
+The implementation uses **Quarkus Reactive Routes, Hibernate Reactive with Panache, and Mutiny** for async operations.
+
 
 ---
 
 ## Prerequisites
 - Java 17+
 - Maven 3.8+
-- MySQL 8+
+- MySQL 8+ (Reactive driver support)
 - IDE (IntelliJ / VS Code / Eclipse)
 
 ---
@@ -28,8 +30,8 @@ cd product-management
 ```properties
 quarkus.datasource.db-kind=mysql
 quarkus.datasource.username=root
-quarkus.datasource.password=your_password
-quarkus.datasource.jdbc.url=jdbc:mysql://localhost:3306/product_db
+quarkus.datasource.password=root
+quarkus.datasource.reactive.url=vertx-reactive:mysql://localhost:3306/product_db
 quarkus.hibernate-orm.database.generation=update
 ```
 
@@ -119,15 +121,16 @@ mvn test
 ---
 
 ## Technologies Used
-- Java 17
-- Quarkus
-- Hibernate ORM + Panache
-- MySQL
+- Java 21
+- Quarkus (Reactive RESTEasy)
+- Hibernate Reactive with Panache
+- MySQL Reactive Driver
 - Maven
-- JUnit 5
+- Mutiny (Reactive programming API)
+- Mockito
 
 ---
 
 ## Author
-Your Name - [your.email@example.com](mailto:your.email@example.com)
+Uday Donthula - [touday.dontula@gmail.com](mailto:touday.dontula@gmail.com)
 
